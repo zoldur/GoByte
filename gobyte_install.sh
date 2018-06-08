@@ -6,7 +6,7 @@ CONFIGFOLDER='/root/.gobytecore'
 COIN_DAEMON='gobyted'
 COIN_CLI='gobyte-cli'
 COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/gobytecoin/gobyte/releases/download/v0.12.1.3/GoByte_0.12.1.3_Linux.zip'
+COIN_TGZ='https://github.com/gobytecoin/gobyte/releases/download/v0.12.2.3/GoByte_0.12.2.3_Linux.tar.gz'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
 COIN_NAME='Gobyte'
 COIN_PORT=12455
@@ -26,13 +26,9 @@ function download_node() {
   cd $TMP_FOLDER >/dev/null 2>&1
   wget -q $COIN_TGZ
   compile_error
-  unzip $COIN_ZIP >/dev/null 2>&1
+  tar xvzf $COIN_ZIP -C / >/dev/null 2>&1
   compile_error
-  cd GoByte_0.12.1.3_Linux
-  chmod +x $COIN_DAEMON
-  chmod +x $COIN_CLI
-  cp $COIN_DAEMON $COIN_CLI $COIN_PATH
-  cd ~ >/dev/null 2>&1
+  cd - >/dev/null 2>&1
   rm -rf $TMP_FOLDER >/dev/null 2>&1
   clear
 }
