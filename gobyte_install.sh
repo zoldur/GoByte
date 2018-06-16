@@ -8,6 +8,7 @@ COIN_CLI='gobyte-cli'
 COIN_PATH='/usr/local/bin/'
 COIN_TGZ='https://github.com/gobytecoin/gobyte/releases/download/v0.12.2.3/GoByte_0.12.2.3_Linux.tar.gz'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
+SENTINEL_REPO='https://github.com/gobytecoin/sentinel.git'
 COIN_NAME='Gobyte'
 COIN_PORT=12455
 RPC_PORT=12454
@@ -18,6 +19,19 @@ NODEIP=$(curl -s4 api.ipify.org)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
+
+
+function install_sentinel() {
+  echo -e "${GREEN}Install sentinel.${NC}"
+  apt-get -y install python-virtualenv virtualenv >/dev/null 2>&1
+  git clone $SENTINEL_REPO /root/sentinel_$COIN_NAME >/dev/null 2>&1
+  cd /root/sentinel_$COIN_NAME
+  virtualenv ./venv >/dev/null 2>&1
+  ./venv/bin/pip install -r requirements.txt >/dev/null 2>&1
+  echo  "* * * * * cd /root/sentinel_$COIN_NAME && ./venv/bin/python bin/sentinel.py >> $CONFIGFOLDER/sentinel.log 2>&1" > $CONFIGFOLDER/$COIN_NAME.cron
+  crontab $CONFIGFOLDER/$COIN_NAME.cron
+  rm $CONFIGFOLDER/$COIN_NAME.cron >/dev/null 2>&1
+}
 
 
 
@@ -123,26 +137,6 @@ maxconnections=256
 masternode=1
 externalip=$NODEIP:$COIN_PORT
 masternodeprivkey=$COINKEY
-addnode=207.148.22.61:8989
-addnode=45.76.141.38:8989
-addnode=45.77.234.57:8989
-addnode=45.77.7.153:8989
-addnode=45.76.141.38:8989
-addnode=194.87.102.118:8989
-addnode=212.158.160.125:8989
-addnode=91.191.244.230:8989
-addnode=176.36.122.245:8989
-addnode=79.137.71.57:8989
-addnode=209.250.253.235:8989
-addnode=217.76.187.239:8989
-addnode=88.148.11.141:8989
-addnode=134.249.122.219:8989
-addnode=185.221.152.230:8989
-addnode=194.87.102.118
-addnode=213.21.15.18
-addnode=45.77.7.153
-addnode=87.239.33.15:8989
-addnode=91.191.244.230:8989
 EOF
 }
 
@@ -220,7 +214,7 @@ apt-get update >/dev/null 2>&1
 apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" make software-properties-common \
 build-essential libtool autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev libboost-program-options-dev \
 libboost-system-dev libboost-test-dev libboost-thread-dev sudo automake git wget curl libdb4.8-dev bsdmainutils libdb4.8++-dev \
-libminiupnpc-dev libgmp3-dev ufw pkg-config libevent-dev  libdb5.3++ unzip libzmq5 >/dev/null 2>&1
+libminiupnpc-dev libgmp3-dev ufw pkg-config libevent-dev >/dev/null 2>&1
 if [ "$?" -gt "0" ];
   then
     echo -e "${RED}Not all required packages were installed properly. Try to install them manually by running the following commands:${NC}\n"
@@ -230,7 +224,7 @@ if [ "$?" -gt "0" ];
     echo "apt-get update"
     echo "apt install -y make build-essential libtool software-properties-common autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev \
 libboost-program-options-dev libboost-system-dev libboost-test-dev libboost-thread-dev sudo automake git curl libdb4.8-dev \
-bsdmainutils libdb4.8++-dev libminiupnpc-dev libgmp3-dev ufw pkg-config libevent-dev libdb5.3++ unzip libzmq5"
+bsdmainutils libdb4.8++-dev libminiupnpc-dev libgmp3-dev ufw pkg-config libevent-dev"
  exit 1
 fi
 clear
@@ -258,6 +252,7 @@ function setup_node() {
   create_key
   update_config
   enable_firewall
+  install_sentinel
   important_information
   configure_systemd
 }
