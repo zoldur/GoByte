@@ -6,7 +6,7 @@ CONFIGFOLDER='/root/.gobytecore'
 COIN_DAEMON='gobyted'
 COIN_CLI='gobyte-cli'
 COIN_PATH='/usr/local/bin/'
-COIN_TGZ='https://github.com/gobytecoin/gobyte/releases/download/v0.12.2.3/GoByte_0.12.2.3_Linux.tar.gz'
+COIN_TGZ='https://github.com/gobytecoin/gobyte/releases/download/v0.12.2.4/GoByteCore-0.12.2.4_Linux64.tar.gz'
 COIN_ZIP=$(echo $COIN_TGZ | awk -F'/' '{print $NF}')
 SENTINEL_REPO='https://github.com/gobytecoin/sentinel.git'
 COIN_NAME='Gobyte'
@@ -40,7 +40,9 @@ function download_node() {
   cd $TMP_FOLDER >/dev/null 2>&1
   wget -q $COIN_TGZ
   compile_error
-  tar xvzf $COIN_ZIP -C / >/dev/null 2>&1
+  tar xvzf $COIN_ZIP --strip 4 >/dev/null 2>&1
+  compile_error
+  cp $COIN_DAEMON $COIN_CLI $COIN_PATH >/dev/null 2>&1
   compile_error
   cd - >/dev/null 2>&1
   rm -rf $TMP_FOLDER >/dev/null 2>&1
